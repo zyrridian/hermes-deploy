@@ -1,0 +1,34 @@
+name: hermes
+
+services:
+  hermes:
+    image: ${HERMES_IMAGE:-nousresearch/hermes-agent:stable}
+    container_name: hermes
+    restart: unless-stopped
+
+    # Keep the image's default entrypoint (s6 supervisor). Don't add init: true.
+    command: ["gateway", "run"]
+
+    ports:
+      # API server, only active if API_SERVER_ENABLED=true. Loopback only; use an SSH tunnel.
+      - "127.0.0.1:${HERMES_API_PORT:-8642}:8642"
+
+    volumes:
+      # Config, API keys, memory, sessions, skills.
+      - ${HERMES_DATA_DIR:-./data}:/opt/data
+
+    environment:
+      TZ: ${TZ:-UTC}
+      # Dashboard is off. Keep it on loopback if you enable it (see README).
+      # HERMES_DASHBOARD: "1"
+      # HERMES_DASHBOARD_HOST: "127.0.0.1"
+
+    shm_size: 1g # Chromium (browser tools) needs shared memory
+    mem_limit: ${HERMES_MEM_LIMIT:-4g}
+    cpus: ${HERMES_CPUS:-2.0}
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"

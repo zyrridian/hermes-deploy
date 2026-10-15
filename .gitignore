@@ -1,0 +1,8 @@
+.env
+data/
+backups/
+backup.log
+compose.override.yaml
+*.age
+*.pem
+*.key
